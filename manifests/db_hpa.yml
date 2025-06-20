@@ -2,7 +2,7 @@
 apiVersion: autoscaling/v2 
 kind: HorizontalPodAutoscaler
 metadata:
-  name: my-hpa
+  name: db-hpa
   namespace: dev
 spec:
   scaleTargetRef:
