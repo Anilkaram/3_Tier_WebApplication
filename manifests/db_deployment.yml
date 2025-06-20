@@ -28,14 +28,14 @@ spec:
             cpu: "200m"
             memory: "350Mi"
         livenessProbe:
-          exec:
-            command: ["sh", "-c", "mysqladmin ping -h localhost"]
+          tcpSocket:
+            port: 3306
           initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 30
         readinessProbe:
-          exec:
-            command: ["sh", "-c", "mysqladmin ping -h localhost"]
+          tcpSocket:
+            port: 3306
           initialDelaySeconds: 3
           periodSeconds: 5
           timeoutSeconds: 30
