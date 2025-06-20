@@ -41,7 +41,7 @@ spec:
           periodSeconds: 5
           timeoutSeconds: 30
       imagePullSecrets:
-        - name: mydockerhub-secret
+      - name: mydockerhub-secret
 
     
               
