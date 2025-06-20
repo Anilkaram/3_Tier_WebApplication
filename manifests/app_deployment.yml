@@ -21,8 +21,6 @@ spec:
         image: anildoc143/privaterepo_websites:app
         ports:
           - containerPort: 8080
-        imagepullsecrets:
-          - name: mydockerhub-secret
         resources:
           requests:
             cpu: "100m"
@@ -42,6 +40,8 @@ spec:
           initialDelaySeconds: 3
           periodSeconds: 5
           timeoutSeconds: 30
+      imagepullsecrets:
+        - name: mydockerhub-secret
 
     
               
