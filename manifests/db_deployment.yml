@@ -10,7 +10,6 @@ spec:
   selector:
     matchLabels:
       app: db
-      environment: dev
   template: 
     metadata:
       labels:
