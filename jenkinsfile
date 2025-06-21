@@ -1,0 +1,123 @@
+pipeline {
+    agent any 
+    tools {
+        maven 'mymaven'
+    }
+    environment {
+        SONAR_PROJECT = 'latest_project'
+        DOCKER_IMAGE_DB = 'anildoc143/privaterepo_websites:db'
+        DOCKER_IMAGE_APP = 'anildoc143/privaterepo_websites:app'
+    }
+    stages {
+        stage ('cleanWs') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage ('code') {
+            steps {
+                echo 'Cloning the repository...'
+                git 'https://github.com/Anilkaram/dockerwebapp.git'
+                echo 'Repository cloned successfully!'
+            }
+        }
+        stage ('CQA') {
+            steps {
+                script {
+                    withSonarQubeEnv(credentialsId: 'SonarQube') {
+                        echo 'Running SonarQube analysis...'
+                        sh "mvn clean verify sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT"
+                        echo 'SonarQube analysis completed!'
+                    }
+                } 
+            }
+        }
+        stage ('quality gate'){
+            steps {
+                echo 'Waiting for SonarQube quality gate...'
+                script {
+                    def qg = waitForQualityGate abortPipeline: false, credentialsId: 'SonarQube'
+                    if (qg.status != 'OK') {
+                        error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
+                    }
+                }
+                echo 'SonarQube quality gate passed!'
+            }
+        }
+        stage ('build') {
+            steps {
+                echo 'Building the application...'
+                sh 'mvn clean package'
+                sh 'mv target Docker-app/'
+                echo 'Application build completed!'
+            }
+        }
+        stage ('artifact_upload_s3') {
+            steps {
+                echo 'Uploading artifacts to S3...'
+                s3Upload consoleLogLevel: 'INFO', dontSetBuildResultOnFailure: false, dontWaitForConcurrentBuildCompletion: false, entries: [[bucket: 'myawsbucket.anil.terraform', excludedFile: '', flatten: false, gzipFiles: false, keepForever: false, managedArtifacts: false, noUploadOnFailure: true, selectedRegion: 'us-east-1', showDirectlyInBrowser: false, sourceFile: 'target/*.war', storageClass: 'STANDARD', uploadFromSlave: false, useServerSideEncryption: false]], pluginFailureResultConstraint: 'FAILURE', profileName: 'myawsbucket.anil.terraform', userMetadata: []
+                echo 'Artifacts uploaded to S3 successfully!'
+            }
+        }
+        stage ('image') {
+            steps {
+                echo 'Building Docker images...'
+                sh "docker inspect $DOCKER_IMAGE_DB >/dev/null 2>&1; then
+                    echo 'Docker image for database already exists.'
+                 else 
+                    echo 'Building Docker image for database...'
+                    docker build -t $DOCKER_IMAGE_DB Docker-db
+                }"
+                sh "docker inspect $DOCKER_IMAGE_APP >/dev/null 2>&1; then
+                    echo 'Docker image for database already exists.'
+                 else 
+                    echo 'Building Docker image for database...'
+                    docker build -t $DOCKER_IMAGE_APP Docker-app
+                }"
+            }
+        }
+        stage ('scan') {
+            steps {
+                echo 'Scanning Docker images with Trivy...'
+                sh 'trivy image --exit-code 1 --severity CRITICAL $DOCKER_IMAGE_DB || exit 1'
+                sh 'trivy image --exit-code 1 --severity CRITICAL $DOCKER_IMAGE_APP || exit 1'
+                echo 'Docker images scanned successfully!'
+            }
+        }
+        stage ('push') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'Dockerhub') {
+                        echo 'Pushing Docker images to Docker Hub...'
+                        sh 'docker push $DOCKER_IMAGE_DB'
+                        sh 'docker push $DOCKER_IMAGE_APP'
+                        echo 'Docker images pushed to Docker Hub successfully!'
+                    }
+                }
+            }
+        }
+        stage ('remove images') {
+            steps {
+                echo 'Removing Docker images...'
+                sh "docker rmi $DOCKER_IMAGE_DB || true"
+                sh "docker rmi $DOCKER_IMAGE_APP || true"
+                echo 'Docker images removed successfully!'
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Cleaning up workspace...'
+            cleanWs()
+            echo 'Workspace cleaned up!'
+        }
+        success {
+            slackSend (channel: '#jenkins', message: "✅ Pipeline SUCCESS: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}\nURL: ${env.BUILD_URL}")
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            slackSend (channel: '#jenkins', message: "❌ Pipeline FAILED: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}\nURL: ${env.BUILD_URL}")
+            echo 'Pipeline failed!'
+        }
+    }
+}
