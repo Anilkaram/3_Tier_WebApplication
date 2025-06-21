@@ -28,16 +28,14 @@ spec:
             cpu: "200m"
             memory: "350Mi"
         livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
           initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 30
         readinessProbe:
-          httpGet:
-            path: /health
-            port: 8080     
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]     
           initialDelaySeconds: 3
           periodSeconds: 5
           timeoutSeconds: 30
