@@ -28,7 +28,10 @@ Helm - Kubernetes package management
 ![Screenshot (233)](https://github.com/user-attachments/assets/5fa0a154-212c-4730-9ce7-ca81f6c5a5db)
 
 # Deploying application using ArgoCD
-![Screenshot (221)](https://github.com/user-attachments/assets/f768b767-5edb-446f-a37b-529f7d8ac634)
+![Screenshot (234)](https://github.com/user-attachments/assets/c6499e1f-7f0c-40b5-9368-bc3e916834d0)
+
+# Final Application 
+![Screenshot (198)](https://github.com/user-attachments/assets/399867b1-3ccd-44d7-bbc6-c23c17760a89)
 
 Key Features
 ✅ End-to-End Automation – From code commit to production
