@@ -29,7 +29,7 @@ spec:
             memory: "350Mi"
         volumeMounts:
           - name: mydbvolume
-            path: /
+            path: /sql/
       volumes:
         - name: mydbvolume
           emptyDir: {}
