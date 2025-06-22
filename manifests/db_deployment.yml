@@ -29,15 +29,9 @@ spec:
             memory: "350Mi"
         livenessProbe:
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:3306]
+            command: ["mysqladmin", "ping", "-h", "mysql"]
           initialDelaySeconds: 30
           periodSeconds: 10
-          timeoutSeconds: 30
-        readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:3306]
-          initialDelaySeconds: 30
-          periodSeconds: 5
           timeoutSeconds: 30
       imagePullSecrets:
         - name: mydockerhub-secret
