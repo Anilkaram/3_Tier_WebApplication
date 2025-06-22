@@ -29,19 +29,16 @@ spec:
             memory: "350Mi"
         livenessProbe:
           httpGet:
-            path: /actuator/health/liveness
+            path: /healthz
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 3
         readinessProbe:
           httpGet:
-            path: /actuator/health/readiness
+            path: /healthz
             port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 5
           timeoutSeconds: 1
-          successThreshold: 2
       imagePullSecrets:
       - name: mydockerhub-secret
 
