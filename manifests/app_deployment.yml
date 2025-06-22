@@ -27,18 +27,6 @@ spec:
           limits:
             cpu: "200m"
             memory: "350Mi"
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 3
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          timeoutSeconds: 1
       imagePullSecrets:
       - name: mydockerhub-secret
 
