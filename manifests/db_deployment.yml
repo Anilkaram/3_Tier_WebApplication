@@ -30,9 +30,9 @@ spec:
         volumeMounts:
           - name: mydbvolume
             path: /
-        volumes:
-          - name: mydbvolume
-            emptyDir: {}
+      volumes:
+        - name: mydbvolume
+          emptyDir: {}
       imagePullSecrets:
         - name: mydockerhub-secret
 
