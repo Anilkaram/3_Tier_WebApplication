@@ -3,48 +3,33 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: db-statefulset
-  namespace: dev
-  annotations:
-    kubernetes.io/change-cause: "deploying Backend Database"
 spec:
   selector:
     matchLabels:
       app: db
-  template: 
+  template:
     metadata:
       labels:
         app: db
     spec:
-      securityContext:
-        runAsUser: 999
-        fsGroup: 999
-      containers: 
-      - name: db-container
-        image: anildoc143/privaterepo_websites:db
-        ports:
-        - containerPort: 3306
-        resources:
-          requests:
-            cpu: "500m"
-            memory: "1Gi"
-          limits:
-            cpu: "2"
-            memory: "2Gi"
-        volumeMounts:
-        - name: db-data
-          mountPath: /var/lib/mysql
-        livenessProbe:
-          exec:
-            command: ["mysqladmin", "ping"]
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command: ["mysql", "-uroot", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
-          initialDelaySeconds: 5
-          periodSeconds: 5
+      containers:
+        - name: db-container
+          image: anildoc143/privaterepo_websites:db           # Optional: specify a version
+          ports:
+            - containerPort: 3306
+          resources:
+              requests:
+                cpu: "500m"
+                memory: "1Gi"
+              limits:
+                cpu: "2"
+                memory: "2Gi"
+          volumeMounts:
+          - name: db-data
+            mountPath: /var/lib/mysql
       volumes:
-      - name: db-data
-        emptyDir: {}  # Use a PersistentVolumeClaim in production
+        - name: db-data
+          hostPath: 
+            path: /data/db
       imagePullSecrets:
         - name: mydockerhub-secret
